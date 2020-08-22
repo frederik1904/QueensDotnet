@@ -12,7 +12,7 @@ namespace Queens
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
             MultiThreadedQueens queens = new MultiThreadedQueens();
-            for (int i = 7; i <= 7; i++)
+            for (int i = 2; i <= 16; i++)
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -43,7 +43,6 @@ namespace Queens
         {
             if (pos == NoOfQueens)
             {
-                Print();
                 this.NoOfSolutions++;
                 return;
             }
