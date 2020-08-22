@@ -11,7 +11,7 @@ namespace Queens
     {
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
-            for (int i = 2; i <= 14; i++)
+            for (int i = 2; i <= 15; i++)
             {
                 MultiThreadedQueens queens = new MultiThreadedQueens();
 
@@ -83,7 +83,16 @@ namespace Queens
 
         private string convert(int row, int col) => (char)(row + 1 + 'A' - 1) + "" + col + " ";
 
-        public void SetPos(int index, int value) => QueenPositions[index] = value;
+        public bool SetPos(int index, int value)
+        {
+            if (LegalMove(index, value))
+            {
+                QueenPositions[index] = value;
+                return true;
+            }
+
+            return false;
+        }
     }
 
     class MultiThreadedQueens
@@ -100,7 +109,11 @@ namespace Queens
                 {
                     Queen q = new Queen(NoOfQueens);
                     q.SetPos(0, i);
-                    q.SetPos(1, j);
+                    if (!q.SetPos(1, j))
+                    {
+                        countdown.Signal();
+                        continue;
+                    }
                     queens.Add(q);
                     ThreadPool.QueueUserWorkItem(new WaitCallback(x =>
                     {
