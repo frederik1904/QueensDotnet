@@ -11,10 +11,9 @@ namespace Queens
     {
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
-            for (int i = 2; i <= 15; i++)
+            MultiThreadedQueens queens = new MultiThreadedQueens();
+            for (int i = 7; i <= 7; i++)
             {
-                MultiThreadedQueens queens = new MultiThreadedQueens();
-
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var NoOfSolutions = await queens.FindNoOfSolutions(i);
@@ -30,9 +29,11 @@ namespace Queens
         public int NoOfQueens { get; set; }
         public int NoOfSolutions { get; set; }
         private int[] QueenPositions;
+        private ReaderWriterLock rw;
 
-        public Queen(int noOfQueens)
+        public Queen(int noOfQueens, ReaderWriterLock rw)
         {
+            this.rw = rw;
             NoOfQueens = noOfQueens;
             NoOfSolutions = 0;
             QueenPositions = new int[noOfQueens];
@@ -42,6 +43,7 @@ namespace Queens
         {
             if (pos == NoOfQueens)
             {
+                Print();
                 this.NoOfSolutions++;
                 return;
             }
@@ -74,11 +76,13 @@ namespace Queens
 
         private void Print()
         {
+            rw.AcquireWriterLock(10000);
             for (int i = 0; i < NoOfQueens; i++)
             {
                 Console.Write(convert(i, QueenPositions[i]));
             }
             Console.WriteLine();
+            rw.ReleaseLock();
         }
 
         private string convert(int row, int col) => (char)(row + 1 + 'A' - 1) + "" + col + " ";
@@ -98,33 +102,60 @@ namespace Queens
     class MultiThreadedQueens
     {
         public int NoOfSolutions { get; set; }
+        private ReaderWriterLock rw = new ReaderWriterLock();
 
         public async Task<int> FindNoOfSolutions(int NoOfQueens)
         {
             List<Queen> queens = new List<Queen>();
-            CountdownEvent countdown = new CountdownEvent(NoOfQueens * NoOfQueens);
-            for (int i = 0; i < NoOfQueens; i++)
+            List<Queen> oddQueens = new List<Queen>();
+            int halfQueens = NoOfQueens / 2;
+            int noOfThreads = halfQueens * NoOfQueens;
+
+            if (NoOfQueens % 2 == 1)
+            {
+                noOfThreads += NoOfQueens;
+            }
+
+            CountdownEvent countdown = new CountdownEvent(noOfThreads);
+
+            if (NoOfQueens % 2 ==  1)
+            {
+                for (int i = 0; i < NoOfQueens; i++)
+                {
+                  oddQueens.Add(CreateThread(NoOfQueens, halfQueens + 1, i, countdown));  
+                }    
+            }
+            
+            for (int i = 0; i < halfQueens; i++)
             {
                 for (int j = 0; j < NoOfQueens; j++)
                 {
-                    Queen q = new Queen(NoOfQueens);
-                    q.SetPos(0, i);
-                    if (!q.SetPos(1, j))
-                    {
-                        countdown.Signal();
-                        continue;
-                    }
-                    queens.Add(q);
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(x =>
-                    {
-                        q.FindSolutions(2);
-                        countdown.Signal();
-                    }));
+                    queens.Add(CreateThread(NoOfQueens, i, j, countdown));
                 }
             }
             countdown.Wait();
-            NoOfSolutions = queens.Aggregate(0, (acc, x) => acc + x.NoOfSolutions);
+            NoOfSolutions = 
+                2 * queens.Aggregate(0, (acc, x) => acc + x.NoOfSolutions)
+                + oddQueens.Aggregate(0, (acc, x) => acc + x.NoOfSolutions);
             return NoOfSolutions;
+        }
+
+        private Queen CreateThread(int NoOfQueens, int i, int j, CountdownEvent countdown)
+        {
+            Queen q = new Queen(NoOfQueens, rw);
+            q.SetPos(0, i);
+            if (!q.SetPos(1, j))
+            {
+                countdown.Signal();
+                return q;
+            }
+            ThreadPool.QueueUserWorkItem(new WaitCallback(x =>
+            {
+                q.FindSolutions(2);
+                countdown.Signal();
+            }));
+
+            return q;
         }
     }
 }
