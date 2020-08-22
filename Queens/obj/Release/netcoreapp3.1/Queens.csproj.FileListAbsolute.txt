@@ -1,0 +1,12 @@
+/Users/frederik/Documents/Queens/Queens/bin/Release/netcoreapp3.1/Queens.deps.json
+/Users/frederik/Documents/Queens/Queens/bin/Release/netcoreapp3.1/Queens.runtimeconfig.json
+/Users/frederik/Documents/Queens/Queens/bin/Release/netcoreapp3.1/Queens.runtimeconfig.dev.json
+/Users/frederik/Documents/Queens/Queens/bin/Release/netcoreapp3.1/Queens.dll
+/Users/frederik/Documents/Queens/Queens/bin/Release/netcoreapp3.1/Queens.pdb
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.csprojAssemblyReference.cache
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.AssemblyInfoInputs.cache
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.AssemblyInfo.cs
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.csproj.CoreCompileInputs.cache
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.dll
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.pdb
+/Users/frederik/Documents/Queens/Queens/obj/Release/netcoreapp3.1/Queens.genruntimeconfig.cache
