@@ -12,15 +12,12 @@ namespace Queens
         public static async System.Threading.Tasks.Task Main(string[] args)
         {
             MultiThreadedQueens queens = new MultiThreadedQueens();
-            for (int i = 2; i <= 16; i++)
-            {
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                var NoOfSolutions = await queens.FindNoOfSolutions(i);
-                stopwatch.Stop();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var NoOfSolutions = await queens.FindNoOfSolutions(16);
+            stopwatch.Stop();
 
-                Console.WriteLine($"Found {queens.NoOfSolutions} solutions for {i} queens, it took {stopwatch.ElapsedMilliseconds}ms");
-            }
+            Console.WriteLine($"Found {queens.NoOfSolutions} solutions for 16 queens, it took {stopwatch.ElapsedMilliseconds}ms");
         }
     }
 
@@ -29,11 +26,9 @@ namespace Queens
         public int NoOfQueens { get; set; }
         public int NoOfSolutions { get; set; }
         private int[] QueenPositions;
-        private ReaderWriterLock rw;
 
         public Queen(int noOfQueens, ReaderWriterLock rw)
         {
-            this.rw = rw;
             NoOfQueens = noOfQueens;
             NoOfSolutions = 0;
             QueenPositions = new int[noOfQueens];
@@ -62,9 +57,10 @@ namespace Queens
             for (int i = col - 1; i >= 0; i--)
             {
                 int pos = QueenPositions[i];
+                int diff = (col - i);
                 if (   pos == row
-                    || pos == row - (col - i)
-                    || pos == row + (col - i)
+                    || pos == row - diff
+                    || pos == row + diff
                     )
                     {
                     return false;
@@ -72,20 +68,7 @@ namespace Queens
             }
             return true;
         }
-
-        private void Print()
-        {
-            rw.AcquireWriterLock(10000);
-            for (int i = 0; i < NoOfQueens; i++)
-            {
-                Console.Write(convert(i, QueenPositions[i]));
-            }
-            Console.WriteLine();
-            rw.ReleaseLock();
-        }
-
-        private string convert(int row, int col) => (char)(row + 1 + 'A' - 1) + "" + col + " ";
-
+        
         public bool SetPos(int index, int value)
         {
             if (LegalMove(index, value))
@@ -148,11 +131,11 @@ namespace Queens
                 countdown.Signal();
                 return q;
             }
-            ThreadPool.QueueUserWorkItem(new WaitCallback(x =>
+            ThreadPool.QueueUserWorkItem(x =>
             {
                 q.FindSolutions(2);
                 countdown.Signal();
-            }));
+            });
 
             return q;
         }
